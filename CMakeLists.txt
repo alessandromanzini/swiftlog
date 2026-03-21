@@ -85,5 +85,5 @@ add_subdirectory( "lib" )
 
 # test executable
 if( SWIFTLOG_BUILD_TESTS )
-    add_subdirectory( "tests" )
+    add_subdirectory( "test" )
 endif()

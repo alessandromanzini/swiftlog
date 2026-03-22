@@ -1,58 +1,46 @@
-# # "cmake-lists": swiftlog, "author": alessandromanzini
-# swiftlog lib specific logic here.
+# # "cmake-lists": swiftguard, "author": alessandromanzini
+# swiftguard lib specific logic here.
 #
-project( swiftlog )
-
-
-# ========================================
-# SOURCE FILES
-# ========================================
-
-set(OBJECT_TARGET ${PROJECT_NAME}_object)
-set(STATIC_TARGET ${PROJECT_NAME})
-set(SHARED_TARGET ${PROJECT_NAME}_shared)
-
-# create object lib for single compile static/shared linking
-add_library( ${OBJECT_TARGET} OBJECT src/library.cpp )
-
-# add actual library targets
-add_library( ${STATIC_TARGET} STATIC )
-add_library( ${SHARED_TARGET} SHARED )
-
-# namespaced aliases for find_package / FetchContent consumers
-add_library( ${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${STATIC_TARGET} )
-add_library( ${PROJECT_NAME}::shared ALIAS ${SHARED_TARGET} )
-
 
 # ========================================
 # TARGET CONFIGURATION
 # ========================================
 
-# object target includes the directories
+# target names
+set( OBJECT_TARGET ${PROJECT_NAME}_object )
+set( STATIC_TARGET ${PROJECT_NAME}_static )
+set( SHARED_TARGET ${PROJECT_NAME}_shared )
+
+# source and include directories
+set( SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src )
+set( INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include )
+
+# create object lib for single compile static/shared linking
+file( GLOB_RECURSE SOURCE_FILES ${SRC_DIR}/*.cpp )
+add_library( ${OBJECT_TARGET} OBJECT ${SOURCE_FILES} )
+
+# set object target compile options
+include( target_compile_options_strict )
+target_compile_options_strict( ${OBJECT_TARGET} )
+
+# set object target directories
 target_include_directories( ${OBJECT_TARGET}
-                            PUBLIC
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                            $<INSTALL_INTERFACE:include>
-                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src )
+                            PUBLIC $<BUILD_INTERFACE:${INC_DIR}> $<INSTALL_INTERFACE:include>
+                            PRIVATE ${SRC_DIR} )
 
-# static and shared targets link against object
-target_link_libraries( ${STATIC_TARGET} PUBLIC ${OBJECT_TARGET} )
-set_target_properties( ${STATIC_TARGET} PROPERTIES OUTPUT_NAME ${PROJECT_NAME} )
+# set object target precompile headers
+target_precompile_headers( ${OBJECT_TARGET} PRIVATE ${INC_DIR}/${PROJECT_NAME}/pch.hpp )
 
-target_link_libraries( ${SHARED_TARGET} PUBLIC ${OBJECT_TARGET} )
-set_target_properties( ${SHARED_TARGET} PROPERTIES OUTPUT_NAME ${PROJECT_NAME} )
-
-# add compile macros for dynamic symbols exports
-string( TOUPPER ${PROJECT_NAME} UPPER_PROJECT_NAME )
-target_compile_definitions( ${STATIC_TARGET} PUBLIC ${UPPER_PROJECT_NAME}_STATIC )
-target_compile_definitions( ${SHARED_TARGET}
-                            PUBLIC ${UPPER_PROJECT_NAME}_SHARED
-                            PRIVATE ${UPPER_PROJECT_NAME}_BUILDING )
+# add distribution targets
+include( add_library_distribution_targets )
+add_library_distribution_targets( ${STATIC_TARGET} ${SHARED_TARGET} ${OBJECT_TARGET} ${PROJECT_NAME} )
 
 
-# set maximum warning level and treat warnings as errors
-#include( set_w4wx_macro )
-#set_w4wx()
+# ========================================
+# UMBRELLA HEADER
+# ========================================
+include( generate_umbrella_header )
+generate_umbrella_header( ${PROJECT_NAME} ${INC_DIR} ${INC_DIR}/${PROJECT_NAME} )
 
 
 # ========================================

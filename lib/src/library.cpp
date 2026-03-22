@@ -1,9 +1,10 @@
-#include "../include/library.h"
-
-#include <iostream>
+#include <swiftguard/__modules/library.hpp>
 
 
-void hello( )
+namespace swiftguard
 {
-    std::cout << "Hello, World!" << std::endl;
+    auto log( ) -> void
+    {
+        std::cout << "Log!";
+    }
 }

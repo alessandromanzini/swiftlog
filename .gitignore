@@ -47,6 +47,9 @@ Generated\ Files/
 # CLion
 #.idea/
 
+# CMake
+CMakeUserPresets.json
+
 # Claude
 CLAUDE.md
 .claude

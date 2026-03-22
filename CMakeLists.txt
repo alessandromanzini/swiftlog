@@ -1,8 +1,8 @@
-# "cmake-lists": swiftlog, "author": alessandromanzini
+# "cmake-lists": swiftguard, "author": alessandromanzini
 # top-level cmake file, includes the lib and test subdirectories.
 #
-cmake_minimum_required( VERSION 3.26 )
-project( swiftlog
+cmake_minimum_required( VERSION 3.29 )
+project( swiftguard
          VERSION 0.1.0
          DESCRIPTION "A modern C++ logging library"
          LANGUAGES CXX )
@@ -13,10 +13,15 @@ project( swiftlog
 # ========================================
 
 # c++ standard configuration
-set( CMAKE_CXX_STANDARD 23 )
+set( CMAKE_CXX_STANDARD 26 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF )
 message( STATUS "C++${CMAKE_CXX_STANDARD} support has been enabled by default." )
+
+# enable experimental module support
+# set( CMAKE_CXX_MODULE_STD ON )
+# set( CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "0e5b6991-d74f-4b3d-a41c-cf096e0b2508" )
+# message( STATUS "Module support has been enabled." )
 
 # build type configuration
 if( NOT CMAKE_BUILD_TYPE )

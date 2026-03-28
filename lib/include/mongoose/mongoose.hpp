@@ -6,6 +6,7 @@
 
 #include "mongoose/pch.hpp"
 
+#include "mongoose/__config/config.hpp"
 #include "mongoose/__config/export.hpp"
 #include "mongoose/__module/dialog.hpp"
 #include "mongoose/__module/library.hpp"

@@ -1,23 +1,35 @@
 #include <mongoose/__module/library.hpp>
 
+#include <mongoose/cbridge.hpp>
+#include <mongoose/__module/dialog.hpp>
+
 
 namespace mongoose
 {
    auto log( std::source_location const source_location ) -> void
    {
       std::string const where = std::format(
-         "{} at {}:{}:{}\n", source_location.function_name( ), source_location.file_name( ), source_location.line( ),
+         "{} at {}:{}:{}", source_location.function_name( ), source_location.file_name( ), source_location.line( ),
          source_location.column( ) );
 
-      Dialog dialog{ "Assertion", where };
-      dialog.set_width( 500. );
-      dialog.set_style( Dialog::Style::critical );
-      dialog.with_option( "Ignore" )
-            .with_option( "Mute", Dialog::OptionTag::primary )
-            .with_option( "Debug" )
-            .with_option( "Exit", Dialog::OptionTag::cancel );
-
-      std::print( "Jakub likes minors: {}", dialog.display( ) );
+      auto res = Dialog{ "Assertion" }
+                 .with_text_field(
+                    {
+                       .content = "Log manager needs a default property."
+                    } )
+                 .with_text_field(
+                    {
+                       .content = where,
+                       .font_size = 10.f,
+                       .font_style = DialogFontStyle::italic,
+                       .alignment = DialogTextAlignment::left
+                    } )
+                 .with_option( "Ignore" )
+                 .with_option( "Mute", Dialog::OptionTag::primary )
+                 .with_option( "Debug" )
+                 .with_option( "Exit", Dialog::OptionTag::cancel )
+                 .display( );
+      std::print( "Jakub likes minors: {}", res );
    }
 }
 

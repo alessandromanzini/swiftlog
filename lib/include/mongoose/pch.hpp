@@ -2,8 +2,11 @@
 #define MONGOOSE_PCH_HPP
 
 
+#include <mongoose/__config/config.hpp>
 #include <mongoose/__config/export.hpp>
 
+#include <csignal>
+#include <cstddef>
 #include <functional>
 #include <iostream>
 #include <print>

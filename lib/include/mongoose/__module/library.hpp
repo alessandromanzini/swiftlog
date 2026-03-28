@@ -1,7 +1,7 @@
 #ifndef SWIFTLOG_LIBRARY_HPP
 #define SWIFTLOG_LIBRARY_HPP
 
-#include <mongoose/mongoose.hpp>
+#include <mongoose/pch.hpp>
 
 
 namespace mongoose

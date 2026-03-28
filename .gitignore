@@ -36,7 +36,7 @@ bld/
 
 # Project-specific files
 [Tt]est/
-!*/src/[Ww][Ii][Nn]32/
+!lib/src/*/win32
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

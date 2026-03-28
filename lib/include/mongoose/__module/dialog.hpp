@@ -1,11 +1,38 @@
 #ifndef MONGOOSE_DIALOG_HPP
 #define MONGOOSE_DIALOG_HPP
 
-#include <mongoose/mongoose.hpp>
+#include <mongoose/pch.hpp>
 
 
 namespace mongoose
 {
+   // +--------------------------------+
+   // | ENUMERATIONS                   |
+   // +--------------------------------+
+   enum class DialogFontStyle : uint8_t
+   {
+      normal, bold, italic
+   };
+
+   enum class DialogTextAlignment : uint8_t
+   {
+      left, center, right, justified
+   };
+
+   // +--------------------------------+
+   // | DIALOG TEXT FIELD              |
+   // +--------------------------------+
+   struct DialogTextField
+   {
+      std::string_view    content{};
+      float               font_size  = 16.f;
+      DialogFontStyle     font_style = DialogFontStyle::normal;
+      DialogTextAlignment alignment  = DialogTextAlignment::left;
+   };
+
+   // +--------------------------------+
+   // | DIALOG                         |
+   // +--------------------------------+
    class Dialog final
    {
    public:
@@ -20,82 +47,69 @@ namespace mongoose
       };
 
    public:
-      explicit Dialog( std::string_view title, std::string_view body ) noexcept;
+      explicit Dialog( std::string_view title ) noexcept;
+      ~Dialog( ) noexcept = default;
 
-      auto set_width( double const width ) noexcept -> void { width_ = width; }
-      auto set_style( Style const style ) noexcept -> void { style_ = style; }
+      Dialog( Dialog const& )                        = delete;
+      Dialog( Dialog&& ) noexcept                    = default;
+      auto operator=( Dialog const& ) -> Dialog&     = delete;
+      auto operator=( Dialog&& ) noexcept -> Dialog& = delete;
+
       // auto set_icon( DialogIcon const icon ) -> void;
 
-      auto with_option( std::string_view option, OptionTag tag = OptionTag::none ) & noexcept -> Dialog&;
-      auto with_option( std::string_view option, OptionTag tag = OptionTag::none ) && noexcept -> Dialog&&;
-      auto clear_options( ) noexcept -> void;
+      auto set_minimum_width( this auto&& self, float width ) noexcept -> decltype(self);
 
-      [[nodiscard]] auto last_option_selection( ) const noexcept -> char const*;
+      auto with_text_field( this auto&& self, DialogTextField const& field_info ) noexcept -> decltype(self);
+      auto with_option( this auto&& self, std::string_view option, OptionTag tag = OptionTag::none ) noexcept -> decltype(self);
 
-      auto display( ) noexcept -> char const*; // NOLINT(*-use-nodiscard)
-
-   private:
-      std::string_view const title_{};
-      std::string_view const body_{};
-
-      double width_{ 300. };
-      Style style_{ Style::information };
+      auto display( ) noexcept -> std::string_view;
 
    private:
-      static constexpr size_t max_options_count_{ 6U };
-      std::array<char const*, max_options_count_> options_{};
-      uint8_t options_count_{ 0U };
+      static constexpr float max_modal_width_ = 900.f;
 
-      std::optional<uint8_t> default_option_{ std::nullopt };
-      std::optional<uint8_t> cancel_option_{ std::nullopt };
+      std::string_view const title_;
 
-      std::optional<uint8_t> last_selected_option_{ std::nullopt };
+      std::optional<float> min_width_{};
 
-      auto append_option( std::string_view option, OptionTag tag ) noexcept -> void;
+      static constexpr size_t                             max_accessories_count_ = 6U;
+      std::array<DialogTextField, max_accessories_count_> text_fields_{}; // make in_place_vector
+      std::array<char const*, max_accessories_count_>     options_{};
+
+      uint8_t                text_field_count_ = 0U;
+      uint8_t                options_count_    = 0U;
+      std::optional<uint8_t> default_option_{};
+      std::optional<uint8_t> cancel_option_{};
    };
 
 
-   inline auto Dialog::with_option( std::string_view const option, OptionTag const tag ) & noexcept -> Dialog&
+   inline Dialog::Dialog( std::string_view const title ) noexcept : title_{ title } { }
+
+
+   auto Dialog::set_minimum_width( this auto&& self, float width ) noexcept -> decltype(self)
    {
-      append_option( option, tag );
-      return *this;
+      self.min_width_ = width;
+      return self;
    }
 
 
-   inline auto Dialog::with_option( std::string_view const option, OptionTag const tag ) && noexcept -> Dialog&&
+   auto Dialog::with_text_field( this auto&& self, DialogTextField const& field_info ) noexcept -> decltype(self)
    {
-      append_option( option, tag );
-      return std::move( *this );
-   }
-
-
-   inline auto Dialog::clear_options( ) noexcept -> void
-   {
-      options_count_        = 0U;
-      default_option_       = std::nullopt;
-      cancel_option_        = std::nullopt;
-      last_selected_option_ = std::nullopt;
-   }
-
-
-   inline auto Dialog::last_option_selection( ) const noexcept -> char const*
-   {
-      if ( not last_selected_option_.has_value( ) )
+      if ( self.text_field_count_ < self.max_accessories_count_ )
       {
-         return nullptr;
+         self.text_fields_[self.text_field_count_++] = field_info;
       }
-      return options_[last_selected_option_.value( )];
+      return self;
    }
 
 
-   inline auto Dialog::append_option( std::string_view const option, OptionTag const tag ) noexcept -> void
+   auto Dialog::with_option( this auto&& self, std::string_view option, OptionTag const tag ) noexcept -> decltype(self)
    {
-      if ( options_count_ >= max_options_count_ || option.empty( ) )
+      if ( self.options_count_ >= self.max_accessories_count_ || option.empty( ) )
       {
-         return;
+         return self;
       }
       //
-      options_[options_count_] = option.data( );
+      self.options_[self.options_count_] = option.data( );
       //
       switch ( tag )
       {
@@ -103,18 +117,20 @@ namespace mongoose
          //
          case OptionTag::primary:
          {
-            default_option_ = options_count_;
+            self.default_option_ = self.options_count_;
             break;
          }
          //
          case OptionTag::cancel:
          {
-            cancel_option_ = options_count_;
+            self.cancel_option_ = self.options_count_;
             break;
          }
       }
       //
-      ++options_count_;
+      ++self.options_count_;
+      //
+      return self;
    }
 }
 

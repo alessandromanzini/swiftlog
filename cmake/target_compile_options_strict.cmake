@@ -1,5 +1,5 @@
 function( target_compile_options_strict TARGET_NAME )
-
+    #
     if( MSVC )
         target_compile_options(
                 ${TARGET_NAME} PRIVATE
@@ -34,10 +34,10 @@ function( target_compile_options_strict TARGET_NAME )
                 /Zc:inline              # remove unreferenced functions
                 /Zc:preprocessor        # conforming preprocessor
         )
-
+        #
         # disable exceptions engine-wide
         target_compile_definitions( ${TARGET_NAME} PRIVATE _HAS_EXCEPTIONS=0 )
-
+        #
     else() # GCC / Clang
         target_compile_options(
                 ${TARGET_NAME} PRIVATE
@@ -61,7 +61,7 @@ function( target_compile_options_strict TARGET_NAME )
                 -ffast-math             # fast floating point (equiv to /fp:fast)
         )
     endif()
-
-    message( STATUS "${TARGET_NAME}: strict compile options applied." )
-
+    #
+    message( STATUS "${TARGET_NAME}: strict compilation options applied." )
+    #
 endfunction()
